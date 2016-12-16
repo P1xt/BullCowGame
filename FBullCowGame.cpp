@@ -8,7 +8,7 @@ FBullCowGame::FBullCowGame() { Reset(); }
 int32 FBullCowGame::GetMaxTries() const { return MyMaxTries; }
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return MyHiddenWord.length();}
-
+bool FBullCowGame::IsGameWon() const {	return bGameIsWon; }
 
 
 void FBullCowGame::Reset()
@@ -19,15 +19,13 @@ void FBullCowGame::Reset()
 	MyMaxTries = MAX_TRIES;
 	MyHiddenWord = HIDDEN_WORD;
 	MyCurrentTry = 1;
+	bGameIsWon = false;
 	return;
 }
 
 
 
-bool FBullCowGame::IsGameWon() const
-{
-	return false;
-}
+
 
 EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 {
@@ -53,39 +51,39 @@ EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 
 
 // receives a VALID guess, increments turn, and returns count
-FBullCowCount FBullCowGame::SubmitGuess(FString Guess)
+FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)
 {
-	// increment turn
 	MyCurrentTry++;
-
-	// setup a return variable
 	FBullCowCount BullCowCount;
+	int32 WordLength = GetHiddenWordLength(); // assuming same length as guess
 
-	int32 HiddenWordLength = GetHiddenWordLength();
-	int32 GuessLength = Guess.length();
-
-
-	// loop through all letters in the guess
-	for (int32 GChar = 0; GChar < GuessLength; GChar++)
+	// loop through all letters in the hidden word
+	for (int32 MHWChar = 0; MHWChar < WordLength; MHWChar++)
 	{
-		// compare letters against the hidden word
-		for (int32 MWHChar = 0; MWHChar < HiddenWordLength; MWHChar++)
+		// compare letters against the guess
+		for (int32 GChar = 0; GChar < WordLength; GChar++)
 		{
 			// if they match
-			if (Guess[GChar] == MyHiddenWord[MWHChar])
+			if (Guess[MHWChar] == MyHiddenWord[GChar])
 			{
-				// if they're in the same position
-				if (MWHChar == GChar)
+				if (GChar == MHWChar)
 				{
 					BullCowCount.Bulls++;
 				}
-				// else
 				else 
 				{
 					BullCowCount.Cows++;
 				}
 			}
 		}
+	}
+	if (BullCowCount.Bulls == GetHiddenWordLength())
+	{
+		bGameIsWon = true;
+	}
+	else
+	{
+		bGameIsWon = false;
 	}
 	return BullCowCount;
 }
